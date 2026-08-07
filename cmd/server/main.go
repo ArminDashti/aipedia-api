@@ -44,6 +44,9 @@ func main() {
 	}))
 
 	r.GET("/health", h.Health)
+	r.GET("/api/categories", h.ListCategories)
+	r.GET("/api/categories/*path", h.CategoryByPath)
+	r.GET("/api/entries", h.SearchEntries)
 
 	log.Printf("aipedia-api listening on %s", cfg.Addr)
 	if err := r.Run(cfg.Addr); err != nil {

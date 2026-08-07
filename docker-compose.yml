@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: aipedia
       POSTGRES_DB: aipedia
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - aipedia_pgdata:/var/lib/postgresql/data
     healthcheck:
