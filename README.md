@@ -8,15 +8,17 @@ Go (Gin) + PostgreSQL API for AIPedia.
 |--------|------|---------|
 | GET | `/health` | Liveness and database ping |
 
-## Run
+## Run (local)
 
 ```bash
-# Postgres (Docker) — host port 5433
 docker compose up -d
-
 cp .env.example .env
 go mod tidy
 go run ./cmd/server
 ```
 
 Default listen: `:8091`.
+
+## Irancell-T3
+
+Use [`docker-compose.t3.yml`](docker-compose.t3.yml) with images `aipedia-api:latest` and `aipedia-webui:latest` on `t3-net`. Public UI: https://aipedia.xaigrok.ir/
