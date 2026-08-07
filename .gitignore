@@ -1,0 +1,6 @@
+*.exe
+*.EXE
+bin/
+.env
+.armin/
+.cursor/
