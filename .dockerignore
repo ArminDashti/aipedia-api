@@ -1,0 +1,6 @@
+.git
+.armin
+.cursor
+.env
+*.exe
+bin

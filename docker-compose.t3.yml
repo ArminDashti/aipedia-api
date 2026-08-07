@@ -1,0 +1,62 @@
+name: aipedia
+
+services:
+  aipedia-pgsql:
+    image: postgres:16-alpine
+    container_name: aipedia-pgsql
+    environment:
+      POSTGRES_USER: aipedia
+      POSTGRES_PASSWORD: aipedia
+      POSTGRES_DB: aipedia
+    volumes:
+      - aipedia-pgsql-vol:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - t3-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aipedia -d aipedia"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  aipedia-api:
+    image: ${API_IMAGE_TAG:-aipedia-api:latest}
+    container_name: aipedia-api
+    expose:
+      - "8091"
+    environment:
+      ADDR: ":8091"
+      DATABASE_URL: postgres://aipedia:aipedia@aipedia-pgsql:5432/aipedia?sslmode=disable
+      MIGRATIONS_DIR: /app/migrations
+      GIN_MODE: release
+    networks:
+      - t3-net
+    depends_on:
+      aipedia-pgsql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  aipedia-webui:
+    image: ${WEBUI_IMAGE_TAG:-aipedia-webui:latest}
+    container_name: aipedia-webui
+    expose:
+      - "80"
+    environment:
+      API_HOST: aipedia-api
+      API_PORT: "8091"
+    networks:
+      - t3-net
+    depends_on:
+      - aipedia-api
+    restart: unless-stopped
+
+networks:
+  t3-net:
+    name: ${DOCKER_NETWORK:-t3-net}
+    external: true
+
+volumes:
+  aipedia-pgsql-vol:
+    name: aipedia-pgsql-vol
