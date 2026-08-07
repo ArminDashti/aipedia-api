@@ -7,7 +7,7 @@ RUN go mod download
 COPY cmd/ ./cmd/
 COPY internal/ ./internal/
 COPY migrations/ ./migrations/
-RUN CGO_ENABLED=0 go build -o /out/server ./cmd/server
+RUN go mod tidy && CGO_ENABLED=0 go build -o /out/server ./cmd/server
 
 FROM alpine:3.20
 RUN apk add --no-cache ca-certificates tzdata
