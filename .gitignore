@@ -10,3 +10,6 @@ data/
 *.db-shm
 *.db-journal
 
+# === auto-managed large files (>5MB) ===
+bin/import-bookmarks.exe
+bin/server.exe
