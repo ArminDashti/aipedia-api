@@ -1,6 +1,6 @@
 # aipedia-api
 
-Go (Gin) + PostgreSQL API for AIPedia.
+Go (Gin) + SQLite API for AIPedia.
 
 ## Endpoints
 
@@ -16,18 +16,17 @@ Go (Gin) + PostgreSQL API for AIPedia.
 ## Run (local)
 
 ```bash
-docker compose up -d
 cp .env.example .env
 go mod tidy
 go run ./cmd/import-bookmarks
 go run ./cmd/server
 ```
 
+`DATABASE_URL` is a SQLite file path (default `./data/aipedia.db`). The API creates the parent directory if needed.
+
 `BOOKMARKS_DIR` defaults to `../bookmarks` (sibling clone). Re-run import after bookmark edits.
 
 Default listen: `:8091` (set `ADDR` in `.env` if that port is taken locally).
-
-Local Postgres maps to host port **5435** (`5433` is often used by other stacks).
 
 ## Irancell-T3
 

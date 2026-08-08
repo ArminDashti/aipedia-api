@@ -4,3 +4,9 @@ bin/
 .env
 .armin/
 .cursor/
+data/
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+

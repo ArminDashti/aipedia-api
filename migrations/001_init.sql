@@ -7,3 +7,4 @@ CREATE TABLE IF NOT EXISTS schema_meta (
 INSERT INTO schema_meta (key, value)
 VALUES ('app', 'aipedia-api')
 ON CONFLICT (key) DO NOTHING;
+

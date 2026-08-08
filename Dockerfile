@@ -16,5 +16,6 @@ COPY --from=build /out/server /app/server
 COPY --from=build /src/migrations /app/migrations
 ENV ADDR=:8091
 ENV MIGRATIONS_DIR=/app/migrations
+ENV DATABASE_URL=/data/aipedia.db
 EXPOSE 8091
 CMD ["/app/server"]

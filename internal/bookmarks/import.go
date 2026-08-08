@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// ImportDir walks BOOKMARKS_DIR (ai/ and tech/) and upserts into Postgres.
+// ImportDir walks BOOKMARKS_DIR (ai/ and tech/) and upserts into SQLite.
 func ImportDir(ctx context.Context, db *sql.DB, root string) (int, int, error) {
 	root = filepath.Clean(root)
 	tx, err := db.BeginTx(ctx, nil)
@@ -37,7 +37,7 @@ func ImportDir(ctx context.Context, db *sql.DB, root string) (int, int, error) {
 		var id int64
 		err := tx.QueryRowContext(ctx, `
 			INSERT INTO categories (path, slug, title, parent_id, kind, source_path, updated_at)
-			VALUES ($1, $2, $3, $4, $5, $6, NOW())
+			VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
 			RETURNING id
 		`, path, slug, title, parentID, kind, sourcePath).Scan(&id)
 		if err != nil {
@@ -105,8 +105,8 @@ func ImportDir(ctx context.Context, db *sql.DB, root string) (int, int, error) {
 	}
 
 	_, err = tx.ExecContext(ctx, `
-		INSERT INTO schema_meta (key, value) VALUES ('bookmarks_imported_at', $1)
-		ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+		INSERT INTO schema_meta (key, value) VALUES ('bookmarks_imported_at', ?)
+		ON CONFLICT (key) DO UPDATE SET value = excluded.value
 	`, time.Now().UTC().Format(time.RFC3339))
 	if err != nil {
 		return 0, 0, err
@@ -232,7 +232,7 @@ func insertRows(ctx context.Context, tx *sql.Tx, categoryID int64, parsed Parsed
 			INSERT INTO entries (
 				category_id, name, name_url, logo_url, owner_name, owner_url,
 				website_url, description, origin, free_plan, paid_plan, links, attrs, source_row, updated_at
-			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,NOW())
+			) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))
 		`, categoryID, ef.Name, nullStr(ef.NameURL), nullStr(ef.LogoURL), nullStr(ef.OwnerName), nullStr(ef.OwnerURL),
 			nullStr(ef.WebsiteURL), nullStr(ef.Description), nullStr(ef.Origin), nullStr(ef.FreePlan), nullStr(ef.PaidPlan),
 			nullStr(ef.Links), attrs, i+1)

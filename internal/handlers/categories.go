@@ -63,7 +63,7 @@ func (h *Handlers) ListCategories(c *gin.Context) {
 				(SELECT COUNT(*) FROM entries e WHERE e.category_id = c.id)
 			FROM categories c
 			JOIN categories p ON p.id = c.parent_id
-			WHERE p.path = $1
+			WHERE p.path = ?
 			ORDER BY c.path
 		`, parent)
 	}
@@ -122,7 +122,7 @@ func (h *Handlers) getCategory(c *gin.Context, ctx context.Context, path string)
 			(SELECT COUNT(*) FROM entries e WHERE e.category_id = c.id)
 		FROM categories c
 		LEFT JOIN categories p ON p.id = c.parent_id
-		WHERE c.path = $1
+		WHERE c.path = ?
 	`, path)
 
 	dto, err := scanCategoryRow(row)
@@ -144,7 +144,7 @@ func (h *Handlers) listChildren(c *gin.Context, ctx context.Context, path string
 			(SELECT COUNT(*) FROM entries e WHERE e.category_id = c.id)
 		FROM categories c
 		JOIN categories p ON p.id = c.parent_id
-		WHERE p.path = $1
+		WHERE p.path = ?
 		ORDER BY c.path
 	`, path)
 	if err != nil {
@@ -170,7 +170,7 @@ func (h *Handlers) listEntries(c *gin.Context, ctx context.Context, path string)
 				e.website_url, e.description, e.origin, e.free_plan, e.paid_plan, e.links, e.attrs
 			FROM entries e
 			JOIN categories c ON c.id = e.category_id
-			WHERE c.path = $1
+			WHERE c.path = ?
 			ORDER BY e.name
 		`, path)
 	} else {
@@ -180,11 +180,13 @@ func (h *Handlers) listEntries(c *gin.Context, ctx context.Context, path string)
 				e.website_url, e.description, e.origin, e.free_plan, e.paid_plan, e.links, e.attrs
 			FROM entries e
 			JOIN categories c ON c.id = e.category_id
-			WHERE c.path = $1 AND (
-				e.name ILIKE $2 OR COALESCE(e.description, '') ILIKE $2 OR COALESCE(e.owner_name, '') ILIKE $2
+			WHERE c.path = ? AND (
+				e.name LIKE ? COLLATE NOCASE
+				OR COALESCE(e.description, '') LIKE ? COLLATE NOCASE
+				OR COALESCE(e.owner_name, '') LIKE ? COLLATE NOCASE
 			)
 			ORDER BY e.name
-		`, path, like)
+		`, path, like, like, like)
 	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "query failed"})
@@ -215,10 +217,12 @@ func (h *Handlers) SearchEntries(c *gin.Context) {
 		SELECT e.id, e.name, e.name_url, e.logo_url, e.owner_name, e.owner_url,
 			e.website_url, e.description, e.origin, e.free_plan, e.paid_plan, e.links, e.attrs
 		FROM entries e
-		WHERE e.name ILIKE $1 OR COALESCE(e.description, '') ILIKE $1 OR COALESCE(e.owner_name, '') ILIKE $1
+		WHERE e.name LIKE ? COLLATE NOCASE
+			OR COALESCE(e.description, '') LIKE ? COLLATE NOCASE
+			OR COALESCE(e.owner_name, '') LIKE ? COLLATE NOCASE
 		ORDER BY e.name
 		LIMIT 100
-	`, like)
+	`, like, like, like)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "query failed"})
 		return
